@@ -1,42 +1,31 @@
-/** 
-* This class handles the Hand object. A hand contains 13 card objects.
-* A game of bridge allows for (4) hands to be used at one time. Hands
-* are displayed when the player is playing their hand.
-*
-* @author Alexander Schulz
-*/
 package bridgeGame;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
+/** 
+* Hand
+* 
+* This class handles the Hand object. A hand contains 13 card objects.
+* A game of bridge allows for (4) hands to be used at one time. Hands
+* are displayed when the player is playing their hand.
+*
+* @author Alexander Schulz
+* @version 04.09.2017
+*/
 public class Hand
 {
 	//Initialize the collection of cards in a hand
 	private ArrayList<Card> cards;
-	//Initialize boolean to tell if hand is empty
-	private boolean empty = false;
 	
 	/**
 	 * Creates the hand for a given player/AI. Contains 13 card objects.
+	 * 
 	 * @param c Cards in the hand.
 	 */
 	public Hand(ArrayList<Card> c) 
 	{
 		cards = c;
-	}
-	
-	/**
-	 * Determines if the player/AI has any cards left to play.
-	 * @return If the hand is empty.
-	 */
-	public boolean isEmpty()
-	{
-		if(this.cards.size() == 0)
-		{
-			empty = true;
-		}
-		return empty;
 	}
 	
 	/**
@@ -57,12 +46,12 @@ public class Hand
 		ArrayList<Integer> rankings = new ArrayList<Integer>();
 		ArrayList<Card> tempCards = new ArrayList<Card>();
 		
-		for(int i = 0; i < cards.size(); i++)
+		for(Card tempCard: cards)
 		{
-			int suitRank = cards.get(i).sortValue();
-			rankings.add(suitRank*10+cards.get(i).getValue());
+			int suitRank = tempCard.sortValue();
+			rankings.add(suitRank*10+tempCard.getValue());
 		}
-		for(int i = 0; i < cards.size(); i++)
+		for(Card tempCard: cards)
 		{
 			int tempNext = Collections.max(rankings);
 			int tempIndex = rankings.indexOf(tempNext);
@@ -77,14 +66,15 @@ public class Hand
 	
 	/**
 	 * Obtains the High Card Point value of the hand.
+	 * 
 	 * @return High Card Point value
 	 */
 	public int getHCP()
 	{
 		int HCP = 0;
-		for(int i = 0; i<13 ; i++)
+		for(Card tempCard: cards)
 		{
-			HCP = HCP + cards.get(i).getHCP();
+			HCP = HCP + tempCard.getHCP();
 		}
 		return HCP;
 	}
@@ -104,24 +94,24 @@ public class Hand
 	{
 		char tempSuit;
 		int[] cardAmounts = new int[4];
-		for(int i = 0; i<cards.size(); i++)
+		for(Card tempCard: cards)
 		{
-			tempSuit = cards.get(i).getSuit();
+			tempSuit = tempCard.getSuit();
 			if(tempSuit=='C')
 			{
-				cardAmounts[0]++;
+				cardAmounts[Suits.CLUBS.getRankValue()]++;
 			}
 			if(tempSuit=='D')
 			{
-				cardAmounts[1]++;
+				cardAmounts[Suits.DIAMONDS.getRankValue()]++;
 			}
 			if(tempSuit=='H')
 			{
-				cardAmounts[2]++;
+				cardAmounts[Suits.HEARTS.getRankValue()]++;
 			}
 			if(tempSuit=='S')
 			{
-				cardAmounts[3]++;
+				cardAmounts[Suits.SPADES.getRankValue()]++;
 			}
 		}
 		return cardAmounts;
@@ -129,6 +119,7 @@ public class Hand
 	
 	/**
 	 * Returns the highest card in a given suit for the hand.
+	 * 
 	 * @param c Given suit
 	 * @return Index of highest valued card in a given suit
 	 */
@@ -136,19 +127,20 @@ public class Hand
 	{
 		int tempIndex = 0;
 		int tempValue = 0;
-		for(int i = 0; i<cards.size(); i++)
+		for(Card tempCard: cards)
 		{
-			if(cards.get(i).getValue()>tempValue && cards.get(i).getSuit()==c)
+			if(tempCard.getValue()>tempValue && tempCard.getSuit()==c)
 			{
-				tempIndex = i;
-				tempValue = cards.get(i).getValue();
+				tempIndex = cards.indexOf(tempCard);
+				tempValue = tempCard.getValue();
 			}
 		}
 		return tempIndex;
 	}
 	
 	/**
-	 * returns the lowest card in a given suit for the hand.
+	 * Returns the lowest card in a given suit for the hand.
+	 * 
 	 * @param c Given suit
 	 * @return Index of lowest valued card in a given suit
 	 */
@@ -156,12 +148,12 @@ public class Hand
 	{
 		int tempIndex = 0;
 		int tempValue = 15;
-		for(int i = 0; i<cards.size(); i++)
+		for(Card tempCard: cards)
 		{
-			if(cards.get(i).getValue()<tempValue && cards.get(i).getSuit()==c)
+			if(tempCard.getValue()<tempValue && tempCard.getSuit()==c)
 			{
-				tempIndex = i;
-				tempValue = cards.get(i).getValue();
+				tempIndex = cards.indexOf(tempCard);
+				tempValue = tempCard.getValue();
 			}
 		}
 		return tempIndex;
@@ -170,19 +162,15 @@ public class Hand
 	/**
 	 * Returns an ArrayList of the lowest cards of the hand 
 	 * per each suit.
+	 * 
 	 * @return ArrayList<Card> of the lowest cards per suit.
 	 */
 	public ArrayList<Card> lowestCards()
 	{
 		ArrayList<Card> low = new ArrayList<Card>();
-		ArrayList<Character> suits = new ArrayList<Character>();
-		suits.add('C');
-		suits.add('D');
-		suits.add('H');
-		suits.add('S');
-		for(int i = 0; i<suits.size(); i++)
+		for(Suits tempSuits: Suits.values())
 		{
-			char tempSuit = suits.get(i);
+			char tempSuit = tempSuits.getCharValue();
 			int index = lowestInSuit(tempSuit);
 			low.add(cards.get(index));
 		}
@@ -191,6 +179,7 @@ public class Hand
 	
 	/**
 	 * Finds the lowest card by value in an ArrayList of card objects.
+	 * 
 	 * @param cds The ArrayList of card objects
 	 * @return Index of the lowest card in the ArrayList of cards
 	 */
@@ -198,12 +187,12 @@ public class Hand
 	{
 		int tempIndex = 0;
 		int tempValue = 15;
-		for(int i = 0; i<cds.size(); i++)
+		for(Card tempCard: cds)
 		{
-			if(tempValue>cds.get(i).getValue())
+			if(tempValue>tempCard.getValue())
 			{
-				tempValue = cds.get(i).getValue();
-				tempIndex = i;
+				tempValue = tempCard.getValue();
+				tempIndex = cds.indexOf(tempCard);
 			}
 		}
 		return tempIndex;
@@ -212,30 +201,32 @@ public class Hand
 	/** 
 	 * Returns an ArrayList of Card objects with a specific
 	 * suit removed.
+	 * 
 	 * @return Modified ArrayList<Card>
 	 */
 	public ArrayList<Card> removeSuit(ArrayList<Card> cd, char c)
 	{
-		for(int i = 0; i<cd.size(); i++)
+		for(Card tempCard: cd)
 		{
-			if(cd.get(i).getSuit()==c)
+			if(tempCard.getSuit()==c)
 			{
-				cd.remove(i);
+				cd.remove(tempCard);
 			}
 		}
 		return cd;
 	}
 	
 	/**
-	 * Determines whether or not the hand has the given suit
+	 * Determines whether or not the hand has the given suit.
+	 * 
 	 * @return True if the hand has a card with the suit
 	 */
 	public boolean hasSuit(char c)
 	{
 		boolean has = false;
-		for(int i = 0; i<cards.size(); i++)
+		for(Card tempCard: cards)
 		{
-			if(cards.get(i).getSuit()==c)
+			if(tempCard.getSuit()==c)
 			{
 				return true;
 			}
@@ -246,6 +237,7 @@ public class Hand
 	/**
 	 * Returns the index of the best card played during a trick.
 	 * This method also resets the declarer (who plays first).
+	 * 
 	 * @param cards The cards of the trick
 	 * @param contract The contract
 	 * @return Index of best card
@@ -258,50 +250,50 @@ public class Hand
 		ArrayList<Integer> ranking = new ArrayList<Integer>();
 		if(strain=='T')
 		{
-			for(int i = 0; i<cards.size(); i++)
+			for(Card tempCard: cards)
 			{
-				if(cards.get(i).getSuit()==cards.get(0).getSuit())
+				if(tempCard.getSuit()==cards.get(0).getSuit())
 				{
-					ranking.add(cards.get(i).getValue());
+					ranking.add(tempCard.getValue());
 				}
 				else
 				{
 					ranking.add(1);
 				}
 			}
-			for(int i = 0; i<ranking.size(); i++)
+			for(Integer tempRank: ranking)
 			{
-				if(ranking.get(i)>tempMaxValue)
+				if(tempRank>tempMaxValue)
 				{
-					tempMaxValue = ranking.get(i);
-					tempMaxIndex = i;
+					tempMaxValue = tempRank;
+					tempMaxIndex = ranking.indexOf(tempRank);
 				}
 			}
 			return tempMaxIndex;
 		}
 		else
 		{
-			for(int i = 0; i<cards.size(); i++)
+			for(Card tempCard: cards)
 			{
-				if(cards.get(i).getSuit()==cards.get(0).getSuit() && cards.get(0).getSuit()!=strain)
+				if(tempCard.getSuit()==cards.get(0).getSuit() && cards.get(0).getSuit()!=strain)
 				{
-					ranking.add(cards.get(i).getValue());
+					ranking.add(tempCard.getValue());
 				}
-				if(cards.get(i).getSuit()==strain)
+				if(tempCard.getSuit()==strain)
 				{
-					ranking.add(cards.get(i).getValue()*20);
+					ranking.add(tempCard.getValue()*20);
 				}
-				if(cards.get(i).getSuit()!=strain && cards.get(i).getSuit()!=cards.get(0).getSuit())
+				if(tempCard.getSuit()!=strain && tempCard.getSuit()!=cards.get(0).getSuit())
 				{
 					ranking.add(1);
 				}
 			}
-			for(int i = 0; i<ranking.size(); i++)
+			for(Integer tempRank: ranking)
 			{
-				if(ranking.get(i)>tempMaxValue)
+				if(tempRank>tempMaxValue)
 				{
-					tempMaxValue = ranking.get(i);
-					tempMaxIndex = i;
+					tempMaxValue = tempRank;
+					tempMaxIndex = ranking.indexOf(tempRank);
 				}
 			}
 			return tempMaxIndex;

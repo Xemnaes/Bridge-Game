@@ -1,12 +1,25 @@
 package bridgeGame;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.Scanner;
-
+/**
+ * Game
+ * 
+ * This objects performs the basic functions of a contract
+ * bridge game. It handles the bidding and playing phases,
+ * as well as the rules and AI.
+ * 
+ * @author Alexander Schulz
+ * @version 04.09.2017
+ *
+ */
 public class Game {
 	//Initializes the deck object used in the game.
 	private Deck deck;
+	//Initilizes the list of bidding characters.
+	private ArrayList<Character> suitList = new ArrayList<Character>(Arrays.asList('C','D','H','S','T','P'));
 	//Initializes who starts first during the play.
 	private int declarer;
 	//Initializes whether or not the player is the attacker.
@@ -60,14 +73,13 @@ public class Game {
 	{
 		int pass = 0;
 		int turns = 0;
-		GameOutput output = new GameOutput();
 		Contract currentContract = new Contract('P',0);
 		ArrayList<Contract> contracts = new ArrayList<Contract>();
 		while(pass<3 || pass==3 && turns==3)
 		{
 			if(turns%4==0)
 			{
-				Contract contract = ContractPlayer(hands.get(turns%4), contracts, currentContract, output);
+				Contract contract = ContractPlayer(hands.get(turns%4), contracts, currentContract);
 				if(contract.getStrain()=='P' || contract.getLevel()==0)
 				{
 					pass++;
@@ -113,13 +125,20 @@ public class Game {
 		return currentContract;
 	}
 	
+	/**
+	 * Retrieves the position of the declarer of the bid.
+	 * 
+	 * @param contracts ArrayList of contract objects made
+	 * @param curContract The current contract
+	 * @return
+	 */
 	public int getDeclarer(ArrayList<Contract> contracts, Contract curContract)
 	{
-		for(int i = 0; i<contracts.size(); i++)
+		for(Contract tempContract: contracts)
 		{
-			if(contracts.get(i).getStrain()==curContract.getStrain())
+			if(tempContract.getStrain()==curContract.getStrain())
 			{
-				return i;
+				return contracts.indexOf(tempContract);
 			}
 		}
 		return contracts.size();
@@ -220,19 +239,19 @@ public class Game {
 	/**
 	 * This method handles the player during the bidding phase. Using the given hand and
 	 * previous contracts, the player should choose the best contract for their turn.
+	 * 
 	 * @param hand The given hand of the player
 	 * @param contracts List of previous contracts 
 	 * @param curContract The current contract to be played
 	 * @param output The GameOutput object used for displaying the hand
 	 * @return The player's contract
 	 */
-	public Contract ContractPlayer(Hand hand,ArrayList<Contract> contracts, Contract curContract, GameOutput output)
+	public Contract ContractPlayer(Hand hand,ArrayList<Contract> contracts, Contract curContract)
 	{
-		@SuppressWarnings("resource")
 		Scanner sc = new Scanner(System.in);
 		if(contracts.isEmpty())
 		{
-			String[] display = output.showHand(hand);
+			String[] display = PlayBridge.showHand(hand);
 			System.out.println(display[0]);
 		}
 		int level = -1;
@@ -274,7 +293,7 @@ public class Game {
 				{
 					System.out.println("Please enter a valid strain: ");
 				}
-				testStrain = sc.next(".").charAt(0);
+				testStrain = sc.next(".").toUpperCase().charAt(0);
 				strain = testStrain;
 			}
 			catch (InputMismatchException ime)
@@ -290,6 +309,7 @@ public class Game {
 			}
 		}
 		Contract contract = new Contract(strain, level);
+		sc.close();
 		return contract;
 	}
 	
@@ -304,13 +324,6 @@ public class Game {
 	private boolean strainIsValid(char strain, int level, Contract curContract) {
 		char curStrain = curContract.getStrain();
 		int curLevel = curContract.getLevel();
-		ArrayList<Character> suitList = new ArrayList<Character>();
-		suitList.add('C');
-		suitList.add('D');
-		suitList.add('H');
-		suitList.add('S');
-		suitList.add('T');
-		suitList.add('P');
 		boolean valST = suitList.contains(strain);
 		if(strain>curStrain && valST==true|| strain<=curStrain && level>curLevel && valST==true || strain=='P')
 		{
@@ -321,6 +334,7 @@ public class Game {
 
 	/**
 	 * Determines whether or not the level for a newly made contract is valid.
+	 * 
 	 * @param l Given level from the contract.
 	 * @param curContract The current contract
 	 * @return True if level is valid; false otherwise.
@@ -338,6 +352,7 @@ public class Game {
 	
 	/**
 	 * Handles the AI's response to a partner's contract.
+	 * 
 	 * @param hand The current hand
 	 * @param handMakeup The current hand suite composition
 	 * @param HCP The hand's HCP value
@@ -478,7 +493,8 @@ public class Game {
 	}
 	
 	/**
-	 * Handles the playing phase of the game
+	 * Handles the playing phase of the game.
+	 * 
 	 * @param hands The hands that are being played
 	 * @param contract The contract for the play
 	 * @return The score of the attackers
@@ -494,7 +510,6 @@ public class Game {
 		if(attacker==true && turns==2)
 		{
 			turns++;
-			GameOutput output = new GameOutput();
 			//13 Tricks are going to be made
 			for(int i = 0; i<13; i++)
 			{
@@ -507,7 +522,7 @@ public class Game {
 					hands.get(handIndex).getCards().remove(tCard);
 					tricks.add(tCard);
 					positions.add(handIndex);
-					System.out.println(intToAI(handIndex)+" has placed card: "+output.showCard(tCard));
+					System.out.println(intToAI(handIndex)+" has placed card: "+PlayBridge.showCard(tCard));
 					turns++;
 				}
 				Hand tempHand = new Hand(tricks);
@@ -534,7 +549,6 @@ public class Game {
 		if(attacker==true && turns!=-1)
 		{
 			turns++;
-			GameOutput output = new GameOutput();
 			//13 Tricks are going to be made
 			for(int i = 0; i<13; i++)
 			{
@@ -545,11 +559,11 @@ public class Game {
 					//Player goes
 					if(handIndex==0 || handIndex==2)
 					{
-						Card tCard = PlayerTrick(hands.get(handIndex),contract,output,tricks);
+						Card tCard = PlayerTrick(hands.get(handIndex),contract,tricks);
 						hands.get(handIndex).getCards().remove(tCard);
 						tricks.add(tCard);
 						positions.add(handIndex);
-						System.out.println("Player has placed card: "+output.showCard(tCard));
+						System.out.println("Player has placed card: "+PlayBridge.showCard(tCard));
 						turns++;
 					}
 					//AI Goes
@@ -559,7 +573,7 @@ public class Game {
 						hands.get(handIndex).getCards().remove(tCard);
 						tricks.add(tCard);
 						positions.add(handIndex);
-						System.out.println(intToAI(handIndex)+" has placed card: "+output.showCard(tCard));
+						System.out.println(intToAI(handIndex)+" has placed card: "+PlayBridge.showCard(tCard));
 						turns++;
 					}
 				}
@@ -586,7 +600,6 @@ public class Game {
 		if(attacker==false)
 		{
 			turns++;
-			GameOutput output = new GameOutput();
 			//13 Tricks are going to be made
 			for(int i = 0; i<13; i++)
 			{
@@ -597,11 +610,11 @@ public class Game {
 					//Player goes
 					if(handIndex==0)
 					{
-						Card tCard = PlayerTrick(hands.get(handIndex),contract,output,tricks);
+						Card tCard = PlayerTrick(hands.get(handIndex),contract,tricks);
 						hands.get(handIndex).getCards().remove(tCard);
 						tricks.add(tCard);
 						positions.add(handIndex);
-						System.out.println("Player has placed card: "+output.showCard(tCard));
+						System.out.println("Player has placed card: "+PlayBridge.showCard(tCard));
 						turns++;
 					}
 					//AI Goes
@@ -611,7 +624,7 @@ public class Game {
 						hands.get(handIndex).getCards().remove(tCard);
 						tricks.add(tCard);
 						positions.add(handIndex);
-						System.out.println(intToAI(handIndex)+" has placed card: "+output.showCard(tCard));
+						System.out.println(intToAI(handIndex)+" has placed card: "+PlayBridge.showCard(tCard));
 						turns++;
 					}
 					
@@ -640,6 +653,7 @@ public class Game {
 	
 	/**
 	 * Handles the AI when making tricks.
+	 * 
 	 * @param hand The AI's hand
 	 * @param contract The contract
 	 * @return The card to be used for the trick
@@ -770,20 +784,20 @@ public class Game {
 	
 	/**
 	 * Handles the player when making tricks.
+	 * 
 	 * @param hand The hand of the player
 	 * @param contract The contract
 	 * @param output The GameOutput object for game output
 	 * @param trickHand ArrayList of cards for the hand (in a given trick)
 	 * @return The card to be used for the trick
 	 */
-	public Card PlayerTrick(Hand hand, Contract contract, GameOutput output, ArrayList<Card> trickHand)
+	public Card PlayerTrick(Hand hand, Contract contract, ArrayList<Card> trickHand)
 	{
 		boolean hasSuit = false;
-		@SuppressWarnings("resource")
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Please choose a card: ");
-		System.out.println(output.showHand(hand)[0]);
-		System.out.println(output.showHand(hand)[1]);
+		System.out.println(PlayBridge.showHand(hand)[0]);
+		System.out.println(PlayBridge.showHand(hand)[1]);
 		if(!trickHand.isEmpty())
 		{
 			hasSuit = hand.hasSuit(trickHand.get(0).getSuit());	
@@ -825,11 +839,13 @@ public class Game {
 				startSuitMismatch = false;
 			}
 		}
+		sc.close();
 		return hand.getCards().get(selection);
 	}
 	
 	/**
-	 * Method for determining which card/partners made the trick
+	 * Method for determining which card/partners made the trick.
+	 * 
 	 * @param bestIndexPosition Player/AI position who made the trick
 	 * @param attacker Whether or not the player is attacking
 	 * @return If the attacker made a trick.
@@ -847,6 +863,7 @@ public class Game {
 	
 	/**
 	 * Converts the AI position to name.
+	 * 
 	 * @param i The AI position
 	 * @return AI name
 	 */

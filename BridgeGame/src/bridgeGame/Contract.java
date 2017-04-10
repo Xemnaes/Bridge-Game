@@ -1,5 +1,15 @@
 package bridgeGame;
 
+/** 
+* Contract
+* 
+* This class handles the Contract object. A contract contains
+* both a strain and a level. This objects is used during both the
+* bidding and playing phases.
+*
+* @author Alexander Schulz
+* @version 04.09.2017
+*/
 public class Contract {
 	
 	//Initializes strain of the contract

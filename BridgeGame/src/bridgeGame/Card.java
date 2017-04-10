@@ -1,12 +1,15 @@
+package bridgeGame;
+
 /** 
+* Card
+* 
 * This class handles the Card object. A card contains a suit and a value.
 * The suit can be a diamond, club, heart or spade. The value can range from
 * 1 to Ace. Cards can be ordered into either a deck or hand.
 *
 * @author Alexander Schulz
+* @version 04.09.2017
 */
-package bridgeGame;
-
 public class Card
 {
 	//Initialize suit of the card
@@ -70,17 +73,20 @@ public class Card
 	{
 		if(this.getSuit()=='S')
 		{
-			return 30;
+			return Suits.SPADES.getSortValue();
 		}
 		if(this.getSuit()=='H')
 		{
-			return 20;
+			return Suits.HEARTS.getSortValue();
 		}
 		if(this.getSuit()=='C')
 		{
-			return 10;
+			return Suits.CLUBS.getSortValue();
 		}
-		//This means the suit is a diamond.
+		if(this.getSuit()=='D')
+		{
+			return Suits.DIAMONDS.getSortValue();
+		}
 		return 0;
 	}
 	
@@ -94,18 +100,21 @@ public class Card
 	{
 		if(this.getSuit()=='C')
 		{
-			return 0;
+			return Suits.CLUBS.getRankValue();
 		}
 		if(this.getSuit()=='D')
 		{
-			return 1;
+			return Suits.DIAMONDS.getRankValue();
 		}
 		if(this.getSuit()=='H')
 		{
-			return 2;
+			return Suits.HEARTS.getRankValue();
 		}
-		//This is a spade
-		return 3;
+		if(this.getSuit()=='S')
+		{
+			return Suits.SPADES.getRankValue();
+		}
+		return 0;
 	}
 
 }
