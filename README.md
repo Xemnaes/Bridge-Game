@@ -34,3 +34,8 @@ This game utilizies the command prompt for user input and game display. The game
 
   ##### Playing Phase
   The number under each card displayed
+
+### Additional Comments
+
+If you are compiling in Eclipse and have trouble viewing the suit symbols, do the following:
+Window->Preferences->General->Workspace->Text file encoding->Change to UTF-8
