@@ -13,7 +13,7 @@ package bridgeGame;
 public class Card
 {
 	//Initialize suit of the card
-	private char suit;
+	private Suits suit;
 	//Initialize value of the card (Jack = 11, Queen = 12, King = 13, Ace = 14)
 	private int value;
 	
@@ -22,7 +22,7 @@ public class Card
 	 * @param s The card suit
 	 * @param v The card value
 	 */
-	public Card(char s, int v) 
+	public Card(Suits s, int v) 
 	{
 		suit = s;
 		value = v;
@@ -32,7 +32,7 @@ public class Card
 	 * Returns the suit of the card.
 	 * @return The card's suit
 	 */
-	public char getSuit()
+	public Suits getSuit()
 	{
 		return suit;
 	}
@@ -63,58 +63,64 @@ public class Card
 		}
 		return 0;
 	}
-
-	/**
-	 * Method to determine how the suits are organized in the hand.
-	 * (This is NOT the suit bidding scale rankings).
-	 * @return Integer ranking of suit
-	 */
-	public int sortValue()
+	
+	public int getSortVal()
 	{
-		if(this.getSuit()=='S')
+		switch(suit)
 		{
-			return Suits.SPADES.getSortValue();
-		}
-		if(this.getSuit()=='H')
-		{
-			return Suits.HEARTS.getSortValue();
-		}
-		if(this.getSuit()=='C')
-		{
-			return Suits.CLUBS.getSortValue();
-		}
-		if(this.getSuit()=='D')
-		{
-			return Suits.DIAMONDS.getSortValue();
+		case SPADES:
+			return 30;
+		case HEARTS:
+			return 20;
+		case CLUBS:
+			return 10;
+		case DIAMONDS:
+			return 0;
+		case NOTRUMP:
+			return -1;
+		case PASS:
+			return -1;
 		}
 		return 0;
 	}
 	
-	/**
-	 * Retrieves the index this suit is located in
-	 * the card composition array.
-	 * @param c The given suit
-	 * @return The index of the suit in the Hand class method getComp()
-	 */
-	public int getCompIndex()
+	public int getRankVal()
 	{
-		if(this.getSuit()=='C')
+		switch(suit)
 		{
-			return Suits.CLUBS.getRankValue();
-		}
-		if(this.getSuit()=='D')
-		{
-			return Suits.DIAMONDS.getRankValue();
-		}
-		if(this.getSuit()=='H')
-		{
-			return Suits.HEARTS.getRankValue();
-		}
-		if(this.getSuit()=='S')
-		{
-			return Suits.SPADES.getRankValue();
+		case SPADES:
+			return 3;
+		case HEARTS:
+			return 2;
+		case CLUBS:
+			return 0;
+		case DIAMONDS:
+			return 1;
+		case NOTRUMP:
+			return -1;
+		case PASS:
+			return -1;
 		}
 		return 0;
 	}
-
+	
+	public char getCharVal()
+	{
+		switch(suit)
+		{
+		case SPADES:
+			return 'S';
+		case HEARTS:
+			return 'H';
+		case CLUBS:
+			return 'C';
+		case DIAMONDS:
+			return 'D';
+		case NOTRUMP:
+			return 'T';
+		case PASS:
+			return 'P';
+		}
+		return 0;
+	}
 }

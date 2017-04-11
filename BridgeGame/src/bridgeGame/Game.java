@@ -19,7 +19,7 @@ public class Game {
 	//Initializes the deck object used in the game.
 	private Deck deck;
 	//Initilizes the list of bidding characters.
-	private ArrayList<Character> suitList = new ArrayList<Character>(Arrays.asList('C','D','H','S','T','P'));
+	private ArrayList<Suits> suitList = new ArrayList<Suits>(Arrays.asList(Suits.CLUBS,Suits.DIAMONDS,Suits.HEARTS,Suits.SPADES,Suits.NOTRUMP,Suits.PASS));
 	//Initializes who starts first during the play.
 	private int declarer;
 	//Initializes whether or not the player is the attacker.
@@ -73,14 +73,14 @@ public class Game {
 	{
 		int pass = 0;
 		int turns = 0;
-		Contract currentContract = new Contract('P',0);
+		Contract currentContract = new Contract(Suits.PASS,0);
 		ArrayList<Contract> contracts = new ArrayList<Contract>();
 		while(pass<3 || pass==3 && turns==3)
 		{
 			if(turns%4==0)
 			{
 				Contract contract = ContractPlayer(hands.get(turns%4), contracts, currentContract);
-				if(contract.getStrain()=='P' || contract.getLevel()==0)
+				if(contract.getCharVal()=='P' || contract.getLevel()==0)
 				{
 					pass++;
 				}
@@ -91,7 +91,7 @@ public class Game {
 				}
 				contracts.add(contract);
 				turns++;
-				System.out.println("Player has bid: "+contract.getLevel()+" "+contract.getStrain());
+				System.out.println("Player has bid: "+contract.getLevel()+" "+contract.getCharVal());
 			}
 			else
 			{
@@ -102,7 +102,7 @@ public class Game {
 					partner = contracts.get(contracts.size()-turns%4);
 				}
 				Contract contract = this.ContractAI(hands.get(turns%4), contracts, currentContract, partner);
-				if(contract.getStrain()=='P' || contract.getLevel()==0)
+				if(contract.getCharVal()=='P' || contract.getLevel()==0)
 				{
 					pass++;
 				}
@@ -113,7 +113,7 @@ public class Game {
 				}
 				contracts.add(contract);
 				String name = intToAI(turns%4);
-				System.out.println(name+ " has bid: "+contract.getLevel()+" "+contract.getStrain());
+				System.out.println(name+ " has bid: "+contract.getLevel()+" "+contract.getCharVal());
 				turns++;
 			}
 		}
@@ -130,7 +130,7 @@ public class Game {
 	 * 
 	 * @param contracts ArrayList of contract objects made
 	 * @param curContract The current contract
-	 * @return
+	 * @return The position of the declarer
 	 */
 	public int getDeclarer(ArrayList<Contract> contracts, Contract curContract)
 	{
@@ -166,64 +166,64 @@ public class Game {
 		// If the AI has less than 5 HCP, pass automatically.
 		if(HCP<5)
 		{
-			return new Contract('P',0);
+			return new Contract(Suits.PASS,0);
 		}
 		//If the AI is making their first bid
-		if(partner==null || contracts.size()<4 && partner.getLevel()==0 && partner.getStrain()=='P')
+		if(partner==null || contracts.size()<4 && partner.getLevel()==0 && partner.getCharVal()=='P')
 		{
 			// If HCP are between 5 and 11 points and C&D have 3 cards, return a 1C contract.
-			if(HCP>=5 && HCP<=11 && clubs==3 && diamonds==3 && levelIsValid(1,curContract) && strainIsValid('C',1,curContract))
+			if(HCP>=5 && HCP<=11 && clubs==3 && diamonds==3 && levelIsValid(1,curContract) && strainIsValid(Suits.CLUBS,1,curContract))
 			{
-				return new Contract('C',1);
+				return new Contract(Suits.CLUBS,1);
 			}
 			// If HCP are between 5 and 11 points and C&D have 4 cards, return a 1D contract.
-			if(HCP>=5 && HCP<=11 && clubs==4 && diamonds==4 && levelIsValid(1,curContract) && strainIsValid('D',1,curContract))
+			if(HCP>=5 && HCP<=11 && clubs==4 && diamonds==4 && levelIsValid(1,curContract) && strainIsValid(Suits.DIAMONDS,1,curContract))
 			{
-				return new Contract('D',1);
+				return new Contract(Suits.DIAMONDS,1);
 			}
 			// If HCP is greater than 12 points and S<H and H has 5 or 6 cards, return a 1H contract.
-			if(HCP>=13 && hearts==5 && hearts>spades && levelIsValid(1,curContract) && strainIsValid('H',1,curContract) ||
-			   HCP>=13 && hearts==6 && hearts>spades && levelIsValid(1,curContract) && strainIsValid('H',1,curContract))
+			if(HCP>=13 && hearts==5 && hearts>spades && levelIsValid(1,curContract) && strainIsValid(Suits.HEARTS,1,curContract) ||
+			   HCP>=13 && hearts==6 && hearts>spades && levelIsValid(1,curContract) && strainIsValid(Suits.HEARTS,1,curContract))
 			{
-				return new Contract('H',1);
+				return new Contract(Suits.HEARTS,1);
 			}
 			// If HCP is greater than 12 points and S has 5 or 6 cards, return a 1S contract.
-			if(HCP>=13 && spades==5 && levelIsValid(1,curContract) && strainIsValid('S',1,curContract) ||
-			   HCP>=13 && spades==6 && levelIsValid(1,curContract) && strainIsValid('S',1,curContract))
+			if(HCP>=13 && spades==5 && levelIsValid(1,curContract) && strainIsValid(Suits.SPADES,1,curContract) ||
+			   HCP>=13 && spades==6 && levelIsValid(1,curContract) && strainIsValid(Suits.SPADES,1,curContract))
 			{
-				return new Contract('S',1);
+				return new Contract(Suits.SPADES,1);
 			}
 			// If HCP are between 15 and 17 points and contract can be played, return a 1NT contract.
-			if(HCP>=15 && HCP<=17 && levelIsValid(1,curContract) && strainIsValid('T',1,curContract) &&
+			if(HCP>=15 && HCP<=17 && levelIsValid(1,curContract) && strainIsValid(Suits.NOTRUMP,1,curContract) &&
 			   clubs>1 && diamonds>1 && hearts>1 && spades>1)
 			{
-				return new Contract('T',1);
+				return new Contract(Suits.NOTRUMP,1);
 			}
 			// If HCP are greater than 22 points, return a 2C contract.
-			if(HCP>=22 && levelIsValid(2,curContract) && strainIsValid('C',2,curContract))
+			if(HCP>=22 && levelIsValid(2,curContract) && strainIsValid(Suits.CLUBS,2,curContract))
 			{
-				return new Contract('C',2);
+				return new Contract(Suits.CLUBS,2);
 			}
 			// If HCP are between 5 and 11 points with 6+ D cards, return a 2D contract.
-			if(HCP>=5 && HCP<=11 && levelIsValid(2,curContract) && strainIsValid('D',2,curContract))
+			if(HCP>=5 && HCP<=11 && levelIsValid(2,curContract) && strainIsValid(Suits.DIAMONDS,2,curContract))
 			{
-				return new Contract('D',2);
+				return new Contract(Suits.DIAMONDS,2);
 			}
 			// If HCP are between 5 and 11 points with 6+ H cards, return a 2H contract.
-			if(HCP>=5 && HCP<=11 && levelIsValid(2,curContract) && strainIsValid('H',2,curContract))
+			if(HCP>=5 && HCP<=11 && levelIsValid(2,curContract) && strainIsValid(Suits.HEARTS,2,curContract))
 			{
-				return new Contract('H',2);
+				return new Contract(Suits.HEARTS,2);
 			}
 			// If HCP are between 5 and 11 points with 6+ S cards, return a 2S contract.
-			if(HCP>=5 && HCP<=11 && levelIsValid(2,curContract) && strainIsValid('S',2,curContract))
+			if(HCP>=5 && HCP<=11 && levelIsValid(2,curContract) && strainIsValid(Suits.SPADES,2,curContract))
 			{
-				return new Contract('S',2);
+				return new Contract(Suits.SPADES,2);
 			}
 			// If HCP are between 20 and 21 points and contract can be played, return a 2NT contract.
-			if(HCP>=20 && HCP<=21 && levelIsValid(2,curContract) && strainIsValid('T',2,curContract) &&
+			if(HCP>=20 && HCP<=21 && levelIsValid(2,curContract) && strainIsValid(Suits.NOTRUMP,2,curContract) &&
 			   clubs>1 && diamonds>1 && hearts>1 && spades>1)
 			{
-				return new Contract('T',2);
+				return new Contract(Suits.NOTRUMP,2);
 			}
 		}
 		//AI responses to partner's bid.
@@ -233,7 +233,7 @@ public class Game {
 			return contract;
 		}
 		//In case of overshoot, pass automatically.
-		return new Contract('P',0);
+		return new Contract(Suits.PASS,0);
 	}
 	
 	/**
@@ -243,7 +243,6 @@ public class Game {
 	 * @param hand The given hand of the player
 	 * @param contracts List of previous contracts 
 	 * @param curContract The current contract to be played
-	 * @param output The GameOutput object used for displaying the hand
 	 * @return The player's contract
 	 */
 	public Contract ContractPlayer(Hand hand,ArrayList<Contract> contracts, Contract curContract)
@@ -280,12 +279,12 @@ public class Game {
 				attempts++;	
 			}
 		}
+		valid = false;
 		attempts = 0;
-		char strain = 'Z';
-		char testStrain;
-		valid = strainIsValid(strain, level, curContract);
+		Suits strain = null;
+		char testStrain = 0;
 		System.out.println("Please enter your bid strain: ");
-		while(valid==false || strain=='Z')
+		while(valid==false || strain==null)
 		{
 			try
 			{
@@ -294,7 +293,6 @@ public class Game {
 					System.out.println("Please enter a valid strain: ");
 				}
 				testStrain = sc.next(".").toUpperCase().charAt(0);
-				strain = testStrain;
 			}
 			catch (InputMismatchException ime)
 			{
@@ -302,14 +300,34 @@ public class Game {
 				sc.nextLine();
 				attempts=-1;
 			}
-			valid = strainIsValid(strain, level, curContract);
+			switch(testStrain)
+			{
+				case 'C':
+					strain = Suits.CLUBS;
+					break;
+				case 'D':
+					strain = Suits.DIAMONDS;
+					break;
+				case 'H':
+					strain = Suits.HEARTS;
+					break;
+				case 'S':
+					strain = Suits.SPADES;
+					break;
+				case 'T':
+					strain = Suits.NOTRUMP;
+					break;
+				case 'P':
+					strain = Suits.PASS;
+					break;
+			}
 			if(attempts!=-1)
 			{
 				attempts++;
+				valid = strainIsValid(strain, level, curContract);
 			}
 		}
 		Contract contract = new Contract(strain, level);
-		sc.close();
 		return contract;
 	}
 	
@@ -321,11 +339,12 @@ public class Game {
 	 * @param curContract The current played contract
 	 * @return True if strain is valid; false otherwise
 	 */
-	private boolean strainIsValid(char strain, int level, Contract curContract) {
-		char curStrain = curContract.getStrain();
+	private boolean strainIsValid(Suits strain, int level, Contract curContract) {
+		Contract tempContract = new Contract(strain,level);
+		char curStrain = curContract.getCharVal();
 		int curLevel = curContract.getLevel();
 		boolean valST = suitList.contains(strain);
-		if(strain>curStrain && valST==true|| strain<=curStrain && level>curLevel && valST==true || strain=='P')
+		if(tempContract.getCharVal()>curStrain && valST|| tempContract.getCharVal()<=curStrain && level>curLevel && valST || tempContract.getCharVal()=='P')
 		{
 			return true;
 		}
@@ -343,7 +362,7 @@ public class Game {
 	{
 		int curLevel = curContract.getLevel();
 		boolean valL = l>=1 && l<=7;
-		if(curLevel<l && valL==true || curLevel==l && curContract.getStrain()!='T' && valL==true || l==0)
+		if(curLevel<l && valL || curLevel==l && curContract.getCharVal()!='T' && valL || l==0)
 		{
 			return true;
 		}
@@ -358,7 +377,7 @@ public class Game {
 	 * @param HCP The hand's HCP value
 	 * @param partner The partner's last contract
 	 * @param curContract The current contract
-	 * @return
+	 * @return The contract decided upon by the AI
 	 */
 	public Contract ContractAIResponse(Hand hand, int[] handMakeup, int HCP, Contract partner, Contract curContract)
 	{
@@ -372,124 +391,124 @@ public class Game {
 			balanced = true;
 		}
 		//Response to a 1C contract
-		if(partner.getLevel()==1 && partner.getStrain()=='C')
+		if(partner.getLevel()==1 && partner.getCharVal()=='C')
 		{
-			if(HCP>=13 && HCP<=15 && levelIsValid(2,curContract) && strainIsValid('T',2,curContract))
+			if(HCP>=13 && HCP<=15 && levelIsValid(2,curContract) && strainIsValid(Suits.NOTRUMP,2,curContract))
 			{
-				return new Contract('T',2);
+				return new Contract(Suits.NOTRUMP,2);
 			}
-			if(HCP>=16 && HCP<=17 && levelIsValid(3,curContract) && strainIsValid('T',3,curContract))
+			if(HCP>=16 && HCP<=17 && levelIsValid(3,curContract) && strainIsValid(Suits.NOTRUMP,3,curContract))
 			{
-				return new Contract('T',3);
+				return new Contract(Suits.NOTRUMP,3);
 			}
 		}
 		//Response to 1D contract
-		if(partner.getLevel()==1 && partner.getStrain()=='D')
+		if(partner.getLevel()==1 && partner.getCharVal()=='D')
 		{
-			if(HCP>=13 && HCP<=15 && levelIsValid(2,curContract) && strainIsValid('T',2,curContract))
+			if(HCP>=13 && HCP<=15 && levelIsValid(2,curContract) && strainIsValid(Suits.NOTRUMP,2,curContract))
 			{
-				return new Contract('T',2);
+				return new Contract(Suits.NOTRUMP,2);
 			}
-			if(HCP>=16 && HCP<=17 && levelIsValid(3,curContract) && strainIsValid('T',3,curContract))
+			if(HCP>=16 && HCP<=17 && levelIsValid(3,curContract) && strainIsValid(Suits.NOTRUMP,3,curContract))
 			{
-				return new Contract('T',3);
+				return new Contract(Suits.NOTRUMP,3);
 			}
 		}
 		//Response to 1H contract
-		if(partner.getLevel()==1 && partner.getStrain()=='H' || partner.getLevel()==1 && partner.getStrain()=='S')
+		if(partner.getLevel()==1 && partner.getCharVal()=='H' || partner.getLevel()==1 && partner.getCharVal()=='S')
 		{
-			if(HCP>=6 && spades>=4 && hearts==0 && levelIsValid(1,curContract) && strainIsValid('S',1,curContract))
+			if(HCP>=6 && spades>=4 && hearts==0 && levelIsValid(1,curContract) && strainIsValid(Suits.SPADES,1,curContract))
 			{
-				return new Contract('S',1);
+				return new Contract(Suits.SPADES,1);
 			}
-			if(HCP>=6 && HCP<=9 && spades!=4 && hearts!=3 && levelIsValid(1,curContract) && strainIsValid('T',1,curContract))
+			if(HCP>=6 && HCP<=9 && spades!=4 && hearts!=3 && levelIsValid(1,curContract) && strainIsValid(Suits.NOTRUMP,1,curContract))
 			{
-				return new Contract('T',1);
+				return new Contract(Suits.NOTRUMP,1);
 			}
-			if(HCP>=10 && diamonds>=4 && levelIsValid(1,curContract) && strainIsValid('D',1,curContract))
+			if(HCP>=10 && diamonds>=4 && levelIsValid(1,curContract) && strainIsValid(Suits.DIAMONDS,1,curContract))
 			{
-				return new Contract('D',1);
+				return new Contract(Suits.DIAMONDS,1);
 			}
-			if(HCP>=10 && clubs>=4 && levelIsValid(1,curContract) && strainIsValid('C',1,curContract))
+			if(HCP>=10 && clubs>=4 && levelIsValid(1,curContract) && strainIsValid(Suits.CLUBS,1,curContract))
 			{
-				return new Contract('C',1);
+				return new Contract(Suits.CLUBS,1);
 			}
-			if(HCP>=13 && levelIsValid(2,curContract) && strainIsValid('T',2,curContract))
+			if(HCP>=13 && levelIsValid(2,curContract) && strainIsValid(Suits.NOTRUMP,2,curContract))
 			{
-				return new Contract('T',2);
+				return new Contract(Suits.NOTRUMP,2);
 			}
-			if(HCP>=10 && HCP<=12 && hearts>=3 && levelIsValid(3,curContract) && strainIsValid('H',3,curContract))
+			if(HCP>=10 && HCP<=12 && hearts>=3 && levelIsValid(3,curContract) && strainIsValid(Suits.HEARTS,3,curContract))
 			{
-				return new Contract('H',3);
+				return new Contract(Suits.HEARTS,3);
 			}
-			if(HCP>=15 && HCP<=17 && balanced && levelIsValid(3,curContract) && strainIsValid('T',3,curContract))
+			if(HCP>=15 && HCP<=17 && balanced && levelIsValid(3,curContract) && strainIsValid(Suits.NOTRUMP,3,curContract))
 			{
-				return new Contract('T',3);
+				return new Contract(Suits.NOTRUMP,3);
 			}
-			if(HCP<10 && hearts>=5 && levelIsValid(4,curContract) && strainIsValid('H',4,curContract))
+			if(HCP<10 && hearts>=5 && levelIsValid(4,curContract) && strainIsValid(Suits.HEARTS,4,curContract))
 			{
-				return new Contract('H',4);
+				return new Contract(Suits.HEARTS,4);
 			}
 		}
 		//Response to 1NT contract
-		if(partner.getLevel()==1 && partner.getStrain()=='T')
+		if(partner.getLevel()==1 && partner.getStrain()==Suits.NOTRUMP)
 		{
-			if(HCP>=8 && levelIsValid(2,curContract) && strainIsValid('C',2,curContract))
+			if(HCP>=8 && levelIsValid(2,curContract) && strainIsValid(Suits.CLUBS,2,curContract))
 			{
-				return new Contract('C',2);
+				return new Contract(Suits.CLUBS,2);
 			}
 		}
 		//Response to 2C contract
-		if(partner.getLevel()==2 && partner.getStrain()=='C')
+		if(partner.getLevel()==2 && partner.getStrain()==Suits.CLUBS)
 		{
-			if(HCP>=8 && spades>=5 && levelIsValid(2,curContract) && strainIsValid('S',2,curContract))
+			if(HCP>=8 && spades>=5 && levelIsValid(2,curContract) && strainIsValid(Suits.SPADES,2,curContract))
 			{
-				return new Contract('S',2);
+				return new Contract(Suits.SPADES,2);
 			}
-			if(HCP>=8 && hearts>=5 && levelIsValid(2,curContract) && strainIsValid('H',2,curContract))
+			if(HCP>=8 && hearts>=5 && levelIsValid(2,curContract) && strainIsValid(Suits.HEARTS,2,curContract))
 			{
-				return new Contract('H',2);
+				return new Contract(Suits.HEARTS,2);
 			}
-			if(HCP>=8 && diamonds>=5 && levelIsValid(3,curContract) && strainIsValid('D',3,curContract))
+			if(HCP>=8 && diamonds>=5 && levelIsValid(3,curContract) && strainIsValid(Suits.DIAMONDS,3,curContract))
 			{
-				return new Contract('D',3);
+				return new Contract(Suits.DIAMONDS,3);
 			}
-			if(HCP>=8 && clubs>=5 && levelIsValid(3,curContract) && strainIsValid('C',3,curContract))
+			if(HCP>=8 && clubs>=5 && levelIsValid(3,curContract) && strainIsValid(Suits.CLUBS,3,curContract))
 			{
-				return new Contract('C',3);
+				return new Contract(Suits.CLUBS,3);
 			}
-			if(HCP==8 && balanced && levelIsValid(2,curContract) && strainIsValid('T',2,curContract))
+			if(HCP==8 && balanced && levelIsValid(2,curContract) && strainIsValid(Suits.NOTRUMP,2,curContract))
 			{
-				return new Contract('T',2);
+				return new Contract(Suits.NOTRUMP,2);
 			}
 		}
 		//Response to 2D,2H,2S contract
-		if(partner.getLevel()==2 && partner.getStrain()=='D' || partner.getLevel()==2 && partner.getStrain()=='H' ||
-		   partner.getLevel()==2 && partner.getStrain()=='S')
+		if(partner.getLevel()==2 && partner.getCharVal()=='D' || partner.getLevel()==2 && partner.getCharVal()=='H' ||
+		   partner.getLevel()==2 && partner.getCharVal()=='S')
 		{
-			if(levelIsValid(2,curContract) && strainIsValid('T',2,curContract))
+			if(levelIsValid(2,curContract) && strainIsValid(Suits.NOTRUMP,2,curContract))
 			{
-				return new Contract('T',2);
+				return new Contract(Suits.NOTRUMP,2);
 			}
 		}
 		//Response to 2NT contract
-		if(partner.getLevel()==2 && partner.getStrain()=='T')
+		if(partner.getLevel()==2 && partner.getCharVal()=='T')
 		{
-			if(levelIsValid(3,curContract) && strainIsValid('C',2,curContract))
+			if(levelIsValid(3,curContract) && strainIsValid(Suits.CLUBS,2,curContract))
 			{
-				return new Contract('C',3);
+				return new Contract(Suits.CLUBS,3);
 			}
 		}
 		//Response to 3NT contract
-		if(partner.getLevel()==3 && partner.getStrain()=='T')
+		if(partner.getLevel()==3 && partner.getStrain()==Suits.NOTRUMP)
 		{
-			if(levelIsValid(4,curContract) && strainIsValid('C',4,curContract))
+			if(levelIsValid(4,curContract) && strainIsValid(Suits.CLUBS,4,curContract))
 			{
-				return new Contract('C',4);
+				return new Contract(Suits.CLUBS,4);
 			}
 		}
 		//If no response can be made
-		return new Contract('P',0);
+		return new Contract(Suits.PASS,0);
 	}
 	
 	/**
@@ -507,7 +526,7 @@ public class Game {
 		ArrayList<Integer> positions = new ArrayList<Integer>();
 		ArrayList<Card> tricks = new ArrayList<Card>();
 		//Player is dummy
-		if(attacker==true && turns==2)
+		if(attacker && turns==2)
 		{
 			turns++;
 			//13 Tricks are going to be made
@@ -546,7 +565,7 @@ public class Game {
 			turns = -1;
 		}
 		//Player made the contract
-		if(attacker==true && turns!=-1)
+		if(attacker && turns!=-1)
 		{
 			turns++;
 			//13 Tricks are going to be made
@@ -656,20 +675,21 @@ public class Game {
 	 * 
 	 * @param hand The AI's hand
 	 * @param contract The contract
+	 * @param trickHand The cards played during a trick
 	 * @return The card to be used for the trick
 	 */
 	public Card AITrick(Hand hand, Contract contract, ArrayList<Card> trickHand)
 	{
 		//Partner has gone
-		char trump = contract.getStrain();
+		Suits trump = contract.getStrain();
 		Card tempCard;
 		Hand tempHand = new Hand(trickHand);
 		int[] comp = hand.getCardComp();
 		int people = trickHand.size();
 		if(people>=2)
 		{
-			char curSuit = tempHand.getCards().get(0).getSuit();
-			int curSuitIndex = tempHand.getCards().get(0).getCompIndex();
+			Suits curSuit = tempHand.getCards().get(0).getSuit();
+			int curSuitIndex = tempHand.getCards().get(0).getRankVal();
 			int winningIndex = tempHand.highestCard(contract);
 			int winningValue = tempHand.getCards().get(winningIndex).getValue();
 			//If your partner lost
@@ -695,12 +715,15 @@ public class Game {
 				else
 				{
 					tempCard = new Card(trump,0);
-					int trumpIndex = tempCard.getCompIndex();
-					//You have a trump card
-					if(comp[trumpIndex]>0)
+					int trumpIndex = tempCard.getRankVal();
+					if(trumpIndex!=-1)
 					{
-						int trumpMaxIndex = hand.highestInSuit(trump);
-						return hand.getCards().get(trumpMaxIndex);
+						//You have a trump card
+						if(comp[trumpIndex]>0)
+						{
+							int trumpMaxIndex = hand.highestInSuit(trump);
+							return hand.getCards().get(trumpMaxIndex);
+						}
 					}
 					//You don't have the trump card
 					else
@@ -714,7 +737,7 @@ public class Game {
 			else
 			{
 				curSuit = tempHand.getCards().get(0).getSuit();
-				curSuitIndex = tempHand.getCards().get(0).getCompIndex();
+				curSuitIndex = tempHand.getCards().get(0).getRankVal();
 				//If you have the suit
 				if(comp[curSuitIndex]>0)
 				{
@@ -740,8 +763,8 @@ public class Game {
 			//If you're not first
 			else
 			{
-				char curSuit = tempHand.getCards().get(0).getSuit();
-				int curSuitIndex = tempHand.getCards().get(0).getCompIndex();
+				Suits curSuit = tempHand.getCards().get(0).getSuit();
+				int curSuitIndex = tempHand.getCards().get(0).getRankVal();
 				int winningIndex = tempHand.highestCard(contract);
 				int winningValue = tempHand.getCards().get(winningIndex).getValue();
 				//If you have the suit
@@ -764,12 +787,15 @@ public class Game {
 				else
 				{
 					tempCard = new Card(trump,0);
-					int trumpIndex = tempCard.getCompIndex();
-					//You have a trump card
-					if(comp[trumpIndex]>0)
+					int trumpIndex = tempCard.getRankVal();
+					if(trumpIndex!=-1)
 					{
-						int trumpMaxIndex = hand.highestInSuit(trump);
-						return hand.getCards().get(trumpMaxIndex);
+						//You have a trump card
+						if(comp[trumpIndex]>0)
+						{
+							int trumpMaxIndex = hand.highestInSuit(trump);
+							return hand.getCards().get(trumpMaxIndex);
+						}
 					}
 					//You don't have the trump card
 					else
@@ -780,6 +806,7 @@ public class Game {
 				}
 			}
 		}
+		return tempCard;
 	}
 	
 	/**
@@ -787,7 +814,6 @@ public class Game {
 	 * 
 	 * @param hand The hand of the player
 	 * @param contract The contract
-	 * @param output The GameOutput object for game output
 	 * @param trickHand ArrayList of cards for the hand (in a given trick)
 	 * @return The card to be used for the trick
 	 */
@@ -808,7 +834,7 @@ public class Game {
 		boolean dontCall;
 		//Continue to ask for inputs as long as they have the starting suit and don't select a card in that suit,
 		// or if they don't have the suit but make an invalid selection.
-		while(hasSuit && startSuitMismatch || hasSuit!=true && selection==-1)
+		while(hasSuit && startSuitMismatch || hasSuit!=true && selection<0 || hasSuit!=true && selection>hand.getCards().size()-1)
 		{
 			try
 			{
@@ -839,21 +865,20 @@ public class Game {
 				startSuitMismatch = false;
 			}
 		}
-		sc.close();
 		return hand.getCards().get(selection);
 	}
 	
 	/**
 	 * Method for determining which card/partners made the trick.
 	 * 
-	 * @param bestIndexPosition Player/AI position who made the trick
+	 * @param bestIP Position of the player that won the trick
 	 * @param attacker Whether or not the player is attacking
-	 * @return If the attacker made a trick.
+	 * @return If the attacker made a trick
 	 */
 	public boolean madeTrick(int bestIP, boolean attacker)
 	{
 		boolean made = false;
-		if(attacker==true && bestIP==0 || attacker==true && bestIP==2 ||
+		if(attacker && bestIP==0 || attacker && bestIP==2 ||
 				attacker==false && bestIP==1 || attacker==false && bestIP==3)
 		{
 			made = true;
@@ -869,21 +894,16 @@ public class Game {
 	 */
 	public String intToAI(int i)
 	{
-		if(i==0)
+		switch(i)
 		{
-			return "North";
-		}
-		if(i==1)
-		{
-			return "East";
-		}
-		if(i==2)
-		{
-			return "South";
-		}
-		if(i==3)
-		{
-			return "West";
+			case 0: 
+				return "North";
+			case 1: 
+				return "East";
+			case 2: 
+				return "South";
+			case 3: 
+				return "West";
 		}
 		return null;
 	}

@@ -17,22 +17,30 @@ import java.util.Collections;
 public class Deck
 {
 	//Initialize the deck of cards
-	private ArrayList<Card> cards;
+	private ArrayList<Card> cards = new ArrayList<Card>();
 	
 	/**
 	 * Constructs the Deck object.
 	 * @param c The list of 52 cards in the game
 	 */
-	public Deck(ArrayList<Card> c) 
+	public Deck() 
 	{
-		cards = c;
+		for(Suits tempSuit: Suits.values())
+		{
+			if(tempSuit!=Suits.NOTRUMP && tempSuit!=Suits.PASS)
+			{	
+				for(int i = 2; i<15; i++)
+				{
+					cards.add(new Card(tempSuit,i));
+				}
+			}
+		}
 	}
 	
 	/**
 	 * Shuffles the deck so that a new game can be played.
-	 * @param c The shuffled deck
 	 */
-	public void shuffle(ArrayList<Card> c)
+	public void shuffle()
 	{
 		Collections.shuffle(cards);
 	}

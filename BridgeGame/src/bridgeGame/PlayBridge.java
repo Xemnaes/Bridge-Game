@@ -1,7 +1,5 @@
 package bridgeGame;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -19,29 +17,16 @@ public class PlayBridge {
 
 	/**
 	 * Main method which allows the user to play games of bridge.
-	 *  
-	 * @param args Empty argument.
-	 * @throws FileNotFoundException When the deck is not found.
+	 * 
+	 * @param Empty arguement
 	 */
-	public static void main(String args[]) throws FileNotFoundException
+	public static void main(String args[])
 	{
 		char option = 'Y';
 		while(option=='Y')
 		{
-			ArrayList<Card> cards = new ArrayList<Card>();
-			File file = new File("Deck.txt");
-			Scanner sc = new Scanner(file);
-			while(sc.hasNext())
-			{
-				String[] scString = sc.nextLine().split(" ");
-				char suit = scString[0].charAt(0);
-				int value = Integer.parseInt(scString[1]);
-				Card card = new Card(suit,value);
-				cards.add(card);
-			}
-			sc.close();
-			Deck deck = new Deck(cards);
-			deck.shuffle(cards);
+			Deck deck = new Deck();
+			deck.shuffle();
 			Game game = new Game(deck);
 			ArrayList<Hand> hands = game.deal();
 			Contract contract = game.biddingPhase(hands);
@@ -49,11 +34,14 @@ public class PlayBridge {
 			System.out.println("The bidding phase has ended.");
 			System.out.println("-----------------------------");
 			System.out.println(contractOutput(contract));
-			int score = game.playingPhase(hands, contract);
-			System.out.println("-----------------------------");
-			score = score-contract.getLevel()-6;
-			System.out.println("The score for the attacker was : " + score);
-			System.out.println("-----------------------------");
+			if(contract.getStrain()!=Suits.PASS && contract.getLevel()!=0)
+			{
+				int score = game.playingPhase(hands, contract);
+				System.out.println("-----------------------------");
+				score = score-contract.getLevel()-6;
+				System.out.println("The score for the attacker was : " + score);
+				System.out.println("-----------------------------");
+			}
 			System.out.println("Would you like to play another game? [Y/N]");
 			Scanner sc2 = new Scanner(System.in);
 			boolean wrongInput = false;
@@ -62,7 +50,7 @@ public class PlayBridge {
 			{
 				try
 				{
-					if(wrongInput==true)
+					if(wrongInput)
 					{
 						System.out.println("Please enter a valid selection: ");
 					}
@@ -72,14 +60,13 @@ public class PlayBridge {
 				catch (InputMismatchException ime)
 				{
 					System.out.println("Please enter a valid selection: ");
-					sc.nextLine();
+					sc2.nextLine();
 				}
 				if(option!='N' && option!='Y')
 				{
 					wrongInput = true;
 				}
 			}
-			sc2.close();
 			if(option=='Y')
 			{
 				System.out.println("-----------------------------");
@@ -102,55 +89,55 @@ public class PlayBridge {
 		hand.sortHand();
 		StringBuilder sb = new StringBuilder();
 		StringBuilder sb2 = new StringBuilder();
-		int cardAmount = hand.getCards().size();
 		int previousLocation = 0;
 		char tempChar = 0;
-		for(int i = 0; i<cardAmount; i++)
+		for(Card tempCard: hand.getCards())
 		{
-			char suit = hand.getCards().get(i).getSuit();
-			if(suit=='C')
+			Suits suit = tempCard.getSuit();
+			switch(suit)
 			{
-				sb.append('\u2663');
-				tempChar = '\u2663';
+				case CLUBS:
+					sb.append('\u2663');
+					tempChar = '\u2663';
+					break;
+				case DIAMONDS:
+					sb.append('\u2662');
+					tempChar = '\u2662';
+					break;
+				case HEARTS:
+					sb.append('\u2661');
+					tempChar = '\u2661';
+					break;
+				case SPADES:
+					sb.append('\u2660');
+					tempChar = '\u2660';
+					break;
+				case NOTRUMP:
+					break;
+				case PASS:
+					break;
 			}
-			if(suit=='D')
-			{
-				sb.append('\u2662');
-				tempChar = '\u2662';
-			}
-			if(suit=='H')
-			{
-				sb.append('\u2661');
-				tempChar = '\u2661';
-			}
-			if(suit=='S')
-			{
-				sb.append('\u2660');
-				tempChar = '\u2660';
-			}
-			int HCP = hand.getCards().get(i).getHCP();
+			int HCP = tempCard.getHCP();
 			if(HCP>0)
 			{
-				if(HCP==1)
+				switch(HCP)
 				{
+				case 1:
 					sb.append("Jack");
-				}
-				if(HCP==2)
-				{
+					break;
+				case 2:
 					sb.append("Queen");
-				}
-				if(HCP==3)
-				{
+					break;
+				case 3:
 					sb.append("King");
-				}
-				if(HCP==4)
-				{
+					break;
+				case 4:
 					sb.append("Ace");
 				}
 			}
 			else
 			{
-				sb.append(hand.getCards().get(i).getValue());
+				sb.append(tempCard.getValue());
 			}
 			sb.append("  ");
 			int tempIndex = sb.indexOf(Character.toString(tempChar), previousLocation);
@@ -158,7 +145,7 @@ public class PlayBridge {
 			{
 				sb2.append(" ");
 			}
-			sb2.insert(tempIndex, i);
+			sb2.insert(tempIndex, hand.getCards().indexOf(tempCard));
 			previousLocation = tempIndex+1;
 		}
 		String handOut = sb.toString();
@@ -180,40 +167,42 @@ public class PlayBridge {
 		StringBuilder sb = new StringBuilder();
 		String value = Integer.toString(card.getValue());
 		int HCP = card.getHCP();
-		char suit = card.getSuit();
-		if(suit=='C')
+		Suits suit = card.getSuit();
+		switch(suit)
 		{
-			sb.append('\u2663');
-		}
-		if(suit=='D')
-		{
-			sb.append('\u2662');
-		}
-		if(suit=='H')
-		{
-			sb.append('\u2661');
-		}
-		if(suit=='S')
-		{
-			sb.append('\u2660');
+			case CLUBS:
+				sb.append('\u2663');
+				break;
+			case DIAMONDS:
+				sb.append('\u2662');
+				break;
+			case HEARTS:
+				sb.append('\u2661');
+				break;
+			case SPADES:
+				sb.append('\u2660');
+				break;
+			case NOTRUMP:
+				break;
+			case PASS:
+				break;
 		}
 		if(card.getHCP()>0)
 		{
-			if(HCP==1)
+			switch(HCP)
 			{
-				 sb.append("Jack");
-			}
-			if(HCP==2)
-			{
-				sb.append("Queen");
-			}
-			if(HCP==3)
-			{
-				sb.append("King");
-			}
-			if(HCP==4)
-			{
-				sb.append("Ace");
+				case 1:
+					sb.append("Jack");
+					break;
+				case 2:
+					sb.append("Queen");
+					break;
+				case 3:
+					sb.append("King");
+					break;
+				case 4:
+					sb.append("Ace");
+					break;
 			}
 		}
 		if(card.getHCP()==0)
@@ -222,6 +211,7 @@ public class PlayBridge {
 		}
 		return sb.toString();
 	}
+		
 	
 	/**
 	 * Shows the contract as a string.
@@ -231,30 +221,31 @@ public class PlayBridge {
 	 */
 	public static String contractOutput(Contract contract)
 	{
-		char strain = contract.getStrain();
+		Suits strain = contract.getStrain();
 		int level = contract.getLevel();
 		StringBuilder sb = new StringBuilder();
 		sb.append("The contract is ");
 		sb.append(level+" ");
-		if(strain=='C')
+		switch(strain)
 		{
-			sb.append('\u2663');
-		}
-		if(strain=='D')
-		{
-			sb.append('\u2662');
-		}
-		if(strain=='H')
-		{
-			sb.append('\u2661');
-		}
-		if(strain=='S')
-		{
-			sb.append('\u2660');
-		}
-		if(strain=='T')
-		{
-			sb.append("NT");
+			case CLUBS:
+				sb.append('\u2663');
+				break;
+			case DIAMONDS:
+				sb.append('\u2662');
+				break;
+			case HEARTS:
+				sb.append('\u2661');
+				break;
+			case SPADES:
+				sb.append('\u2660');
+				break;
+			case NOTRUMP:
+				sb.append("NT");
+				break;
+			case PASS:
+				sb.append("P");
+				break;
 		}
 		return sb.toString();
 	}

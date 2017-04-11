@@ -1,7 +1,6 @@
 package bridgeGame;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 /** 
 * Hand
@@ -43,25 +42,20 @@ public class Hand
 	 */
 	public void sortHand()
 	{
-		ArrayList<Integer> rankings = new ArrayList<Integer>();
-		ArrayList<Card> tempCards = new ArrayList<Card>();
-		
-		for(Card tempCard: cards)
 		{
-			int suitRank = tempCard.sortValue();
-			rankings.add(suitRank*10+tempCard.getValue());
-		}
-		for(Card tempCard: cards)
-		{
-			int tempNext = Collections.max(rankings);
-			int tempIndex = rankings.indexOf(tempNext);
-			tempCards.add(cards.get(tempIndex));
-			rankings.set(tempIndex, -1);
-		}
-		for(int i = 0; i < cards.size(); i++)
-		{
-			cards.set(i, tempCards.get(i));
-		}
+	        ArrayList<Card> tempCards = new ArrayList<Card>(cards);
+	        Hand tempHand = new Hand(tempCards);
+	        cards.clear();
+	        for(Suits tempSuit: Suits.values())
+	        {
+	            while(tempHand.hasSuit(tempSuit))
+	            {
+	                int nextMaxIndex = tempHand.highestInSuit(tempSuit);
+	                cards.add(tempHand.getCards().get(nextMaxIndex));
+	                tempHand.getCards().remove(nextMaxIndex);
+	            }
+	        }
+	    }
 	}
 	
 	/**
@@ -92,26 +86,15 @@ public class Hand
 	 */
 	public int[] getCardComp()
 	{
-		char tempSuit;
 		int[] cardAmounts = new int[4];
-		for(Card tempCard: cards)
+		for(Suits tempSuit: Suits.values())
 		{
-			tempSuit = tempCard.getSuit();
-			if(tempSuit=='C')
+			for(Card tempCard: cards)
 			{
-				cardAmounts[Suits.CLUBS.getRankValue()]++;
-			}
-			if(tempSuit=='D')
-			{
-				cardAmounts[Suits.DIAMONDS.getRankValue()]++;
-			}
-			if(tempSuit=='H')
-			{
-				cardAmounts[Suits.HEARTS.getRankValue()]++;
-			}
-			if(tempSuit=='S')
-			{
-				cardAmounts[Suits.SPADES.getRankValue()]++;
+				if(tempCard.getSuit()==tempSuit)
+				{
+					cardAmounts[tempCard.getRankVal()]++;
+				}
 			}
 		}
 		return cardAmounts;
@@ -123,13 +106,13 @@ public class Hand
 	 * @param c Given suit
 	 * @return Index of highest valued card in a given suit
 	 */
-	public int highestInSuit(char c)
+	public int highestInSuit(Suits suit)
 	{
 		int tempIndex = 0;
 		int tempValue = 0;
 		for(Card tempCard: cards)
 		{
-			if(tempCard.getValue()>tempValue && tempCard.getSuit()==c)
+			if(tempCard.getValue()>tempValue && tempCard.getSuit()==suit)
 			{
 				tempIndex = cards.indexOf(tempCard);
 				tempValue = tempCard.getValue();
@@ -144,13 +127,13 @@ public class Hand
 	 * @param c Given suit
 	 * @return Index of lowest valued card in a given suit
 	 */
-	public int lowestInSuit(char c)
+	public int lowestInSuit(Suits suit)
 	{
 		int tempIndex = 0;
 		int tempValue = 15;
 		for(Card tempCard: cards)
 		{
-			if(tempCard.getValue()<tempValue && tempCard.getSuit()==c)
+			if(tempCard.getValue()<tempValue && tempCard.getSuit()==suit)
 			{
 				tempIndex = cards.indexOf(tempCard);
 				tempValue = tempCard.getValue();
@@ -170,8 +153,7 @@ public class Hand
 		ArrayList<Card> low = new ArrayList<Card>();
 		for(Suits tempSuits: Suits.values())
 		{
-			char tempSuit = tempSuits.getCharValue();
-			int index = lowestInSuit(tempSuit);
+			int index = lowestInSuit(tempSuits);
 			low.add(cards.get(index));
 		}
 		return low;
@@ -204,11 +186,11 @@ public class Hand
 	 * 
 	 * @return Modified ArrayList<Card>
 	 */
-	public ArrayList<Card> removeSuit(ArrayList<Card> cd, char c)
+	public ArrayList<Card> removeSuit(ArrayList<Card> cd, Suits suit)
 	{
 		for(Card tempCard: cd)
 		{
-			if(tempCard.getSuit()==c)
+			if(tempCard.getSuit()==suit)
 			{
 				cd.remove(tempCard);
 			}
@@ -221,12 +203,12 @@ public class Hand
 	 * 
 	 * @return True if the hand has a card with the suit
 	 */
-	public boolean hasSuit(char c)
+	public boolean hasSuit(Suits suit)
 	{
 		boolean has = false;
 		for(Card tempCard: cards)
 		{
-			if(tempCard.getSuit()==c)
+			if(tempCard.getSuit()==suit)
 			{
 				return true;
 			}
@@ -244,11 +226,11 @@ public class Hand
 	 */
 	public int highestCard(Contract contract)
 	{
-		char strain = contract.getStrain();
+		Suits strain = contract.getStrain();
 		int tempMaxValue = 0;
 		int tempMaxIndex = 0;
 		ArrayList<Integer> ranking = new ArrayList<Integer>();
-		if(strain=='T')
+		if(contract.getCharVal()=='T')
 		{
 			for(Card tempCard: cards)
 			{

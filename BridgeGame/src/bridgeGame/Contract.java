@@ -13,7 +13,7 @@ package bridgeGame;
 public class Contract {
 	
 	//Initializes strain of the contract
-	private char strain;
+	private Suits strain;
 	//Initializes level of the contract
 	private int level;
 	
@@ -23,7 +23,7 @@ public class Contract {
 	 * @param s Contract's strain
 	 * @param l Contract's level
 	 */
-	public Contract(char s, int l)
+	public Contract(Suits s, int l)
 	{
 		strain = s;
 		level = l;
@@ -33,7 +33,7 @@ public class Contract {
 	 * Obtains the contract's strain.
 	 * @return Contract's strain
 	 */
-	public char getStrain()
+	public Suits getStrain()
 	{
 		return strain;
 	}
@@ -45,6 +45,30 @@ public class Contract {
 	public int getLevel()
 	{
 		return level;
+	}
+	
+	/**
+	 * Obtains the suit character value.
+	 * @return Suit character
+	 */
+	public char getCharVal()
+	{
+		switch(strain)
+		{
+		case SPADES:
+			return 'S';
+		case HEARTS:
+			return 'H';
+		case CLUBS:
+			return 'C';
+		case DIAMONDS:
+			return 'D';
+		case NOTRUMP:
+			return 'T';
+		case PASS:
+			return 'P';
+		}
+		return 0;
 	}
 	
 }
